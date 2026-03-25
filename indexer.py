@@ -4,9 +4,14 @@
 
 import weaviate
 import os
+import base64
 from weaviate.classes.config import Property, DataType
 from weaviate.collections.classes.config import Configure
 
+
+def encode_img(image_path: str):
+    with open(image_path, 'rb') as f:
+        return base64.b64encode(f.read()).decode('utf-8') # encode the image data as a base64 string
 
 def main():
     client = weaviate.connect_to_local()
@@ -37,9 +42,12 @@ def main():
             img_collection.data.insert(
                 {
                     'filename': filename,
-                    'image': image_path # image_path is just a text, we need to encode the actual image data as a blob first
+                    'image': encode_img(image_path) # image_path is just a text, we need to encode the actual image data as a blob first
                 }
             )
 
-    except Exception as e:
-        print(f"Collection already exists: {e}")    
+        print(f"Indexed {img_collection.aggregate.over_all(total_count=True).total_count} images")    
+
+    finally:
+        # client has to be closed after use in vector db all the time, 
+        client.close()
