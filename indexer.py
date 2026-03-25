@@ -51,3 +51,6 @@ def main():
     finally:
         # client has to be closed after use in vector db all the time, 
         client.close()
+
+if __name__ == "__main__":
+    main()
